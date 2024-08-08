@@ -2,6 +2,7 @@ import User from "../models/user.model.js";
 import Notification from "../models/notificationmodel.js";
 import bcrypt from "bcrypt";
 import { v2 as cloudinary } from "cloudinary";
+import mongoose from "mongoose";
 
 export const getAll = async (req, res) => {
   console.log("Insie Get ALL");
@@ -22,7 +23,7 @@ export const getUserProfile = async (req, res) => {
   //console.log(username);
   try {
     const user = await User.findOne({ username: username }).select("-password");
-    console.log(user);
+    // console.log(user.likedPosts);
     if (!user) {
       return res.status(404).json({ error: "User not Found" });
     }
@@ -39,9 +40,10 @@ export const followUnfollowUser = async (req, res) => {
     console.log(id);
     const userToModify = await User.findById(id);
     const currentUser = await User.findById(req.user._id);
+    const targetObjectId = new mongoose.Types.ObjectId(id);
+    const userObjectId = req.user._id;
     console.log(userToModify, currentUser);
-
-    if (id == req.user._id) {
+    if (targetObjectId.equals(userObjectId)) {
       return res
         .status(400)
         .json({ error: "You cant follow/unfollow yourself" });
