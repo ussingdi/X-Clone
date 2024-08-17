@@ -8,9 +8,11 @@ const passwordSchema = z.string().min(8);
 
 export const signup = async (req, res) => {
   const { fullname, username, email, password } = req.body;
+  console.log("Received data:", { fullname, username, email, password }); // Log request data
   try {
     emailSchema.parse(email);
   } catch (error) {
+    console.error("Email validation error:", error); // Log validation error
     return res.status(400).json({ error: "Invalid email format" });
   }
   const existingUser = await User.findOne({ username: username });
@@ -23,13 +25,20 @@ export const signup = async (req, res) => {
     return res.status(400).json({ error: "Emailid already taken" });
   }
   if (!username) {
+    console.log("username error");
     return res.status(400).json({ error: "Error in Username" });
+  }
+  if (!fullname) {
+    console.log("fullname error");
+    return res.status(400).json({ error: "Error in fullname" });
   }
   //validate password
   try {
     passwordSchema.parse(password);
   } catch (error) {
-    return res.status(400).json({ error: "Invalid Password format" });
+    return res.status(400).json({
+      error: "Invalid Password format (Length should be minimum of 8)",
+    });
   }
   // hash password
   const salt = await bcrypt.genSalt(10);
@@ -62,6 +71,7 @@ export const signup = async (req, res) => {
 };
 
 export const login = async (req, res) => {
+  console.log("Inside Login");
   try {
     const { username, password } = req.body;
     const user = await User.findOne({ username });
